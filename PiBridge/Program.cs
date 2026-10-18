@@ -12,19 +12,23 @@ mqttClient.ApplicationMessageReceivedAsync += e =>
 
     try
     {
-        using JsonDocument json = JsonDocument.Parse(message);
+        SensorReading? sensor = JsonSerializer.Deserialize<SensorReading>(
+            message,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
-        string deviceId = json.RootElement.GetProperty("deviceId").GetString() ?? "";
-        double value = json.RootElement.GetProperty("value").GetDouble();
-        string unit = json.RootElement.GetProperty("unit").GetString() ?? "";
-
-        Console.WriteLine("Enhet: " + deviceId);
-        Console.WriteLine("Värde: " + value + " " + unit);
-        Console.WriteLine("-------------------");
+        if (sensor != null)
+        {
+            Console.WriteLine("Enhet: " + sensor.DeviceId);
+            Console.WriteLine("Värde: " + sensor.Value + " " + sensor.Unit);
+            Console.WriteLine("-------------------");
+        }
     }
-    catch (Exception)
+    catch (JsonException)
     {
-        Console.WriteLine("Kunde inte läsa sensordata.");
+        Console.WriteLine("Felaktigt JSON-meddelande.");
     }
 
     return Task.CompletedTask;
