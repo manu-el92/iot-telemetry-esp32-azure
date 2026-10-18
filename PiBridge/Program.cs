@@ -1,12 +1,15 @@
 ﻿using MQTTnet;
 using System.Text.Json;
 
+var azure = new AzureSender();
+await azure.TestConnection();
+
 // Skapa MQTT-klienten
 var factory = new MqttClientFactory();
 var mqttClient = factory.CreateMqttClient();
 
 // Vad ska hända när ett meddelande kommer?
-mqttClient.ApplicationMessageReceivedAsync += e =>
+mqttClient.ApplicationMessageReceivedAsync += async e =>
 {
     string message = e.ApplicationMessage.ConvertPayloadToString();
 
@@ -24,6 +27,8 @@ mqttClient.ApplicationMessageReceivedAsync += e =>
             Console.WriteLine("Enhet: " + sensor.DeviceId);
             Console.WriteLine("Värde: " + sensor.Value + " " + sensor.Unit);
             Console.WriteLine("-------------------");
+
+            await azure.SendReading(sensor);
         }
     }
     catch (JsonException)
@@ -31,7 +36,7 @@ mqttClient.ApplicationMessageReceivedAsync += e =>
         Console.WriteLine("Felaktigt JSON-meddelande.");
     }
 
-    return Task.CompletedTask;
+
 };
 
 // Inställningar för Mosquitto
