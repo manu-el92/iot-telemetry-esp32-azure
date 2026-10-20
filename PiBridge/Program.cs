@@ -42,8 +42,16 @@ mqttClient.ApplicationMessageReceivedAsync += async e =>
 // Inställningar för Mosquitto
 
 
+var mqttPassword = Environment.GetEnvironmentVariable("MQTT_PASSWORD");
+
+if (string.IsNullOrWhiteSpace(mqttPassword))
+{
+    throw new InvalidOperationException("MQTT_PASSWORD saknas.");
+}
+
 var options = new MqttClientOptionsBuilder()
     .WithTcpServer("localhost", 1883)
+    .WithCredentials("esp32", mqttPassword)
     .Build();
 
 try
