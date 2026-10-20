@@ -66,10 +66,8 @@ try
     await mqttClient.SubscribeAsync("sensors/+/telemetry");
     Console.WriteLine("Väntar på sensordata...");
 
-    // Håll programmet igång
-    Console.ReadLine();
-
-    await mqttClient.DisconnectAsync();
+    // Håll gatewayen igång även när den körs som systemd-tjänst
+    await Task.Delay(Timeout.InfiniteTimeSpan);
 }
 catch (Exception ex)
 {
